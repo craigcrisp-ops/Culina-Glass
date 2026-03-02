@@ -1,0 +1,213 @@
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { X, ChevronRight, Mic, Link, Type, Camera, Sparkles, CheckCircle2, Search, ChefHat, Play, Clock, Users, Plus } from "lucide-react";
+import { GlassCard } from "./GlassCard";
+
+interface OnboardingProps {
+  onComplete: (preferences?: string[]) => void;
+  onSkip: () => void;
+}
+
+export function Onboarding({ onComplete, onSkip }: OnboardingProps) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const steps = [
+    {
+      id: "welcome",
+      title: "Welcome to Culina Glass",
+      body: "Save recipes with photos. Browse fast. Cook step by step.",
+      primaryLabel: "Start setup",
+      secondaryLabel: "Skip for now",
+    },
+    {
+      id: "personalize",
+      title: "Pick your favorites",
+      body: "Choose a few categories so your library starts organized.",
+      options: [
+        "Quick Bites",
+        "Family Favorites",
+        "Healthy",
+        "Meal Prep",
+        "Seasonal",
+        "High Protein",
+        "Kid Friendly",
+        "One Pan"
+      ],
+      primaryLabel: "Continue",
+    },
+    {
+      id: "first_recipe_choice",
+      title: "Add your first recipe",
+      body: "Pick the fastest way to get started.",
+      actions: [
+        { label: "Add with Voice", icon: Mic, color: "text-emerald-400" },
+        { label: "Import from URL", icon: Link, color: "text-blue-400" },
+        { label: "Type it in", icon: Type, color: "text-purple-400" }
+      ],
+      primaryLabel: "Add with Voice",
+      secondaryLabel: "Skip",
+    },
+    {
+      id: "voice_intro",
+      title: "Talk to Culina",
+      body: "Say what you want. Culina builds the recipe for you using Gemini.",
+      exampleChips: [
+        "Add a chicken taco recipe for 4",
+        "Create a healthy breakfast smoothie",
+        "Make this kid-friendly",
+        "Give me meal prep bowls for the week"
+      ],
+      primaryLabel: "Enable microphone",
+      secondaryLabel: "Not now",
+    },
+    {
+      id: "quick_tour",
+      title: "Quick tour",
+      body: "Here’s how to move fast inside the app.",
+      tourItems: [
+        { icon: Search, label: "Search bar", desc: "Search recipes or ingredients." },
+        { icon: ChefHat, label: "Category chips", desc: "Tap chips to filter instantly." },
+        { icon: Plus, label: "Add button", desc: "Add by voice, URL, or typing." },
+        { icon: Play, label: "Cooking mode", desc: "Use step cards and timers while you cook." }
+      ],
+      primaryLabel: "Done",
+    }
+  ];
+
+  const currentStep = steps[stepIndex];
+
+  const handleNext = () => {
+    if (stepIndex < steps.length - 1) {
+      setStepIndex(stepIndex + 1);
+    } else {
+      onComplete(selectedCategories);
+    }
+  };
+
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0a0a] p-6">
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-emerald-500/10 blur-[120px]" />
+        <div className="absolute -bottom-[10%] -right-[10%] h-[50%] w-[50%] rounded-full bg-indigo-500/10 blur-[120px]" />
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentStep.id}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 1.05, y: -20 }}
+          className="w-full max-w-2xl"
+        >
+          <GlassCard className="p-12 text-center space-y-10 border-white/10 bg-white/5 rounded-[40px]">
+            <div className="space-y-4">
+              <h2 className="text-5xl font-black tracking-tight text-white leading-tight">
+                {currentStep.title}
+              </h2>
+              <p className="text-xl text-white/40 font-medium leading-relaxed">
+                {currentStep.body}
+              </p>
+            </div>
+
+            {currentStep.id === "personalize" && (
+              <div className="grid grid-cols-2 gap-3">
+                {currentStep.options?.map(opt => (
+                  <button
+                    key={opt}
+                    onClick={() => toggleCategory(opt)}
+                    className={`rounded-2xl border p-5 text-sm font-black uppercase tracking-widest transition-all ${
+                      selectedCategories.includes(opt)
+                        ? "bg-emerald-500 border-emerald-500 text-black shadow-lg shadow-emerald-500/20"
+                        : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {currentStep.id === "first_recipe_choice" && (
+              <div className="space-y-3">
+                {currentStep.actions?.map(action => (
+                  <button
+                    key={action.label}
+                    onClick={handleNext}
+                    className="flex w-full items-center justify-between rounded-3xl bg-white/5 p-6 text-left border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-2xl bg-white/5 ${action.color}`}>
+                        <action.icon className="h-6 w-6" />
+                      </div>
+                      <span className="text-lg font-black text-white">{action.label}</span>
+                    </div>
+                    <ChevronRight className="h-6 w-6 text-white/20 group-hover:text-white transition-all" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {currentStep.id === "voice_intro" && (
+              <div className="space-y-8">
+                <div className="flex flex-wrap justify-center gap-3">
+                  {currentStep.exampleChips?.map(chip => (
+                    <span key={chip} className="rounded-full bg-white/5 border border-white/5 px-4 py-2 text-xs font-bold text-white/40 italic">
+                      "{chip}"
+                    </span>
+                  ))}
+                </div>
+                <div className="p-8 rounded-[32px] bg-indigo-500/5 border border-indigo-500/10 flex items-center gap-6 text-left">
+                  <div className="h-16 w-16 shrink-0 flex items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400">
+                    <Mic className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black text-white">Microphone Access</h4>
+                    <p className="text-sm text-white/40">We use your mic only when you tap it to capture recipes.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep.id === "quick_tour" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                {currentStep.tourItems?.map((item, i) => (
+                  <div key={i} className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-3">
+                    <div className="flex items-center gap-3 text-emerald-400">
+                      <item.icon className="h-5 w-5" />
+                      <span className="text-xs font-black uppercase tracking-widest">{item.label}</span>
+                    </div>
+                    <p className="text-sm text-white/60 leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-4 pt-6">
+              <button
+                onClick={handleNext}
+                className="w-full rounded-[24px] bg-emerald-500 py-6 text-lg font-black text-black hover:bg-emerald-400 hover:scale-[1.02] transition-all shadow-2xl shadow-emerald-500/20"
+              >
+                {currentStep.primaryLabel}
+              </button>
+              {currentStep.secondaryLabel && (
+                <button
+                  onClick={onSkip}
+                  className="text-sm font-black uppercase tracking-widest text-white/20 hover:text-white transition-all"
+                >
+                  {currentStep.secondaryLabel}
+                </button>
+              )}
+            </div>
+          </GlassCard>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
