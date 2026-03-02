@@ -427,4 +427,205 @@ export default function App() {
                                 </p>
                                 {cookingMode && (
                                   <div className="flex items-center gap-4 pt-4">
-                                    <button className="flex items-center gap-3 rounded-2xl bg-emerald-500/10 px-6 py-3 text-sm font-bold text-emerald-400 hover
+                                    <button className="flex items-center gap-3 rounded-2xl bg-emerald-500/10 px-6 py-3 text-sm font-bold text-emerald-400 hover:bg-emerald-500/20 transition-all border border-emerald-500/10">
+                                      <Timer className="h-5 w-5" />
+                                      START TIMER
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </section>
+                  </div>
+
+                  {/* AI Assistant Sidebar */}
+                  <aside className="space-y-8">
+                    <GlassCard className="bg-indigo-500/5 border-indigo-500/10 p-8 rounded-[32px]">
+                      <div className="flex flex-col gap-8">
+                        <div className="flex items-center gap-4 text-indigo-400">
+                          <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/10">
+                            <Sparkles className="h-6 w-6" />
+                          </div>
+                          <h4 className="text-xl font-black uppercase tracking-widest">AI Assistant</h4>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { label: "Scale 2x", icon: Scale, action: "Double the ingredients" },
+                            { label: "Scale 0.5x", icon: Scale, action: "Halve the ingredients" },
+                            { label: "Veganize", icon: Leaf, action: "Make this recipe vegan" },
+                            { label: "Gluten-Free", icon: WheatOff, action: "Make this recipe gluten-free" },
+                          ].map((btn) => (
+                            <button
+                              key={btn.label}
+                              onClick={() => handleAiModify(btn.action)}
+                              className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/5 p-5 text-[10px] font-black uppercase tracking-widest text-white/40 hover:bg-white/10 hover:text-white transition-all border border-white/5"
+                            >
+                              <btn.icon className="h-6 w-6" />
+                              {btn.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Ask anything..."
+                            value={aiQuestion}
+                            onChange={(e) => setAiQuestion(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleAiAsk()}
+                            className="w-full rounded-2xl border border-white/10 bg-white/5 py-5 pl-6 pr-14 text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-white/20"
+                          />
+                          <button
+                            onClick={handleAiAsk}
+                            disabled={aiLoading}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+                          >
+                            {aiLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
+                          </button>
+                        </div>
+
+                        <AnimatePresence>
+                          {aiResponse && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="rounded-2xl bg-white/5 p-6 text-sm text-white/70 border border-white/10 leading-relaxed"
+                            >
+                              <p>{aiResponse}</p>
+                              <button
+                                onClick={() => setAiResponse(null)}
+                                className="mt-6 text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white"
+                              >
+                                Clear Response
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </GlassCard>
+
+                    <GlassCard className="bg-red-500/5 border-red-500/10 p-8 rounded-[32px]">
+                      <h4 className="mb-6 text-[10px] font-black uppercase tracking-widest text-red-400/60">Danger Zone</h4>
+                      <button
+                        onClick={() => handleDeleteRecipe(selectedRecipe.id)}
+                        className="flex w-full items-center justify-center gap-3 rounded-2xl bg-red-500/10 py-5 text-sm font-black text-red-400 hover:bg-red-500 hover:text-white transition-all border border-red-500/10"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                        DELETE RECIPE
+                      </button>
+                    </GlassCard>
+                  </aside>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="grid"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {loading ? (
+                  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-[450px] animate-pulse rounded-[32px] bg-white/5 border border-white/5" />
+                    ))}
+                  </div>
+                ) : recipes.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                    {filteredRecipes.map((recipe) => (
+                      <RecipeCard
+                        key={recipe.id}
+                        recipe={recipe}
+                        onClick={() => setSelectedRecipe(recipe)}
+                        onToggleFavorite={() => handleToggleFavorite(recipe)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-32 text-center">
+                    <div className="mb-10 flex h-32 w-32 items-center justify-center rounded-[40px] bg-white/5 border border-white/10 shadow-2xl">
+                      <ChefHat className="h-16 w-16 text-emerald-400/20" />
+                    </div>
+                    <h2 className="mb-4 text-5xl font-black text-white tracking-tight">Add your first recipe</h2>
+                    <p className="mb-12 max-w-lg text-lg text-white/40 font-medium leading-relaxed">
+                      Pick the fastest way to get started. Your culinary library is waiting.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-4">
+                      <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="flex items-center gap-3 rounded-2xl bg-emerald-500 px-10 py-5 font-black text-black hover:bg-emerald-400 hover:scale-105 transition-all shadow-xl shadow-emerald-500/20"
+                      >
+                        <Mic className="h-5 w-5" />
+                        Add with Voice
+                      </button>
+                      <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="rounded-2xl bg-white/5 px-10 py-5 font-black text-white/60 hover:bg-white/10 hover:text-white transition-all border border-white/10"
+                      >
+                        Import from URL
+                      </button>
+                      <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="rounded-2xl bg-white/5 px-10 py-5 font-black text-white/60 hover:bg-white/10 hover:text-white transition-all border border-white/10"
+                      >
+                        Type it in
+                      </button>
+                    </div>
+
+                    <div className="mt-32 w-full">
+                      <h3 className="mb-10 text-[10px] font-black uppercase tracking-widest text-white/20">Sample Recipes</h3>
+                      <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+                        {SAMPLE_RECIPES.map((r, i) => (
+                          <div key={i} className="group relative aspect-[16/9] overflow-hidden rounded-[32px] border border-white/10 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer shadow-2xl">
+                            <img src={r.coverImageUrl} alt={r.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
+                            <div className="absolute bottom-8 left-8 right-8 text-left">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-2">{r.category}</p>
+                              <h4 className="text-xl font-black text-white leading-tight">{r.title}</h4>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+      </div>
+
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <AddRecipeModal
+            onClose={() => setIsAddModalOpen(false)}
+            onAdd={handleAddRecipe}
+          />
+        )}
+        {isEditModalOpen && selectedRecipe && (
+          <AddRecipeModal
+            recipe={selectedRecipe}
+            onClose={() => setIsEditModalOpen(false)}
+            onAdd={handleUpdateRecipe}
+          />
+        )}
+        {isManualOpen && (
+          <Manual onClose={() => setIsManualOpen(false)} />
+        )}
+        {showOnboarding && (
+          <Onboarding 
+            onComplete={handleOnboardingComplete} 
+            onSkip={() => setShowOnboarding(false)} 
+          />
+        )}
+      </AnimatePresence>
+
+      <LiveVoiceInterface onCommand={handleVoiceCommand} />
+    </div>
+  );
+}
