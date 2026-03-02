@@ -8,7 +8,8 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const db = new Database("recipes.db");
+const dbPath = process.env.PORT ? "/tmp/recipes.db" : "recipes.db";
+const db = new Database(dbPath);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS recipes (
@@ -79,10 +80,10 @@ async function startServer() {
     });
   }
 
- const googlePort = Number(process.env.PORT) || 8080;
-app.listen(googlePort, "0.0.0.0", () => {
-  console.log(`Server running on port ${googlePort}`);
-});
+  const googlePort = Number(process.env.PORT) || 8080;
+  app.listen(googlePort, "0.0.0.0", () => {
+    console.log(`Server running on port ${googlePort}`);
+  });
 }
 
 startServer();
